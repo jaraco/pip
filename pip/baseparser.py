@@ -12,7 +12,7 @@ from pip._vendor.six import string_types
 from pip._vendor.six.moves import configparser
 from pip.locations import (
     legacy_config_file, config_basename, running_under_virtualenv,
-    site_config_files
+    site_config_files, local_config_name,
 )
 from pip.utils import appdirs, get_terminal_size
 
@@ -177,7 +177,7 @@ class ConfigOptionParser(CustomOptionParser):
                     )
                 )
 
-        # finally virtualenv configuration first trumping others
+        # virtualenv config trumps system config
         if running_under_virtualenv():
             venv_config_file = os.path.join(
                 sys.prefix,
@@ -185,6 +185,10 @@ class ConfigOptionParser(CustomOptionParser):
             )
             if os.path.exists(venv_config_file):
                 files.append(venv_config_file)
+
+        # local config trumps environment config
+        if os.path.isfile(local_config_name):
+            files.append(local_config_name)
 
         return files
 

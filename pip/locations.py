@@ -83,6 +83,7 @@ src_prefix = os.path.abspath(src_prefix)
 site_packages = sysconfig.get_python_lib()
 user_site = site.USER_SITE
 user_dir = expanduser('~')
+local_config_name = 'pip.conf'
 if WINDOWS:
     bin_py = os.path.join(sys.prefix, 'Scripts')
     bin_user = os.path.join(user_site, 'Scripts')

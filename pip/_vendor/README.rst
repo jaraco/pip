@@ -95,14 +95,14 @@ such as OS packages.
 pkg_resources
 -------------
 
-pkg_resources has been pulled in from setuptools 28.8.0
+pkg_resources has been pulled in from setuptools 34.2.0
 
 
 Modifications
 -------------
 
 * html5lib has been modified to import six from pip._vendor
-* pkg_resources has been modified to import its externs from pip._vendor
+* pkg_resources has been modified to import its dependencies from pip._vendor
 * CacheControl has been modified to import its dependencies from pip._vendor
 * packaging has been modified to import its dependencies from pip._vendor
 * requests has been modified *not* to optionally load any C dependencies.

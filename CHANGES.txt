@@ -27,6 +27,7 @@
   from an sdist, check in a subprocess to avoid the side-effects of
   importing setuptools (:issue:4264).
 
+* Update pkg_resources from Setuptools 34.2.0 (:issue:4216).
 
 **9.0.1 (2016-11-06)**
 

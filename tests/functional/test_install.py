@@ -1678,6 +1678,7 @@ def test_target_install_ignores_distutils_config_install_prefix(script):
 
 
 @pytest.mark.incompatible_with_test_venv
+@pytest.mark.incompatible_with_framework
 def test_user_config_accepted(script):
     # user set in the config file is parsed as 0/1 instead of True/False.
     # Check that this doesn't cause a problem.

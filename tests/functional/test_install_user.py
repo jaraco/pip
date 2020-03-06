@@ -58,6 +58,7 @@ class Tests_UserSite:
         result.assert_installed('INITools', use_user_site=True)
 
     @pytest.mark.incompatible_with_test_venv
+    @pytest.mark.incompatible_with_framework
     def test_install_from_current_directory_into_usersite(
             self, script, data, with_wheel):
         """
@@ -98,6 +99,7 @@ class Tests_UserSite:
 
     @pytest.mark.network
     @pytest.mark.incompatible_with_test_venv
+    @pytest.mark.incompatible_with_framework
     def test_install_user_conflict_in_usersite(self, script):
         """
         Test user install with conflict in usersite updates usersite.
@@ -122,6 +124,7 @@ class Tests_UserSite:
 
     @pytest.mark.network
     @pytest.mark.incompatible_with_test_venv
+    @pytest.mark.incompatible_with_framework
     def test_install_user_conflict_in_globalsite(self, virtualenv, script):
         """
         Test user install with conflict in global site ignores site and
@@ -153,6 +156,7 @@ class Tests_UserSite:
 
     @pytest.mark.network
     @pytest.mark.incompatible_with_test_venv
+    @pytest.mark.incompatible_with_framework
     def test_upgrade_user_conflict_in_globalsite(self, virtualenv, script):
         """
         Test user install/upgrade with conflict in global site ignores site and
@@ -183,6 +187,7 @@ class Tests_UserSite:
 
     @pytest.mark.network
     @pytest.mark.incompatible_with_test_venv
+    @pytest.mark.incompatible_with_framework
     def test_install_user_conflict_in_globalsite_and_usersite(
             self, virtualenv, script):
         """

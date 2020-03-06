@@ -10,6 +10,7 @@ from tests.lib import assert_all_changes, pyversion
 
 
 @pytest.mark.incompatible_with_test_venv
+@pytest.mark.incompatible_with_framework
 class Tests_UninstallUserSite:
 
     @pytest.mark.network

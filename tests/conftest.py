@@ -58,6 +58,15 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(pytest.mark.skip(
                     'Incompatible with venv'))
 
+        if (
+            sys.platform == 'darwin' and
+            sys._framework and
+            item.get_closest_marker('incompatible_with_framework')
+        ):
+            item.add_marker(
+                pytest.mark.xfail(
+                    reason="Mismatched prefix on framework builds. Ref #7806"))
+
         module_path = os.path.relpath(
             item.module.__file__,
             os.path.commonprefix([__file__, item.module.__file__]),

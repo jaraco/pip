@@ -270,6 +270,7 @@ def test_wheel_record_lines_in_deterministic_order(script, data):
 
 
 @pytest.mark.incompatible_with_test_venv
+@pytest.mark.incompatible_with_framework
 def test_install_user_wheel(script, shared_data, with_wheel, tmpdir):
     """
     Test user install from wheel (that has a script)

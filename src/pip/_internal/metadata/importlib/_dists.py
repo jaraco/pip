@@ -1,5 +1,6 @@
 import email.message
 import importlib.metadata
+import io
 import os
 import pathlib
 import zipfile
@@ -8,7 +9,6 @@ from typing import (
     Dict,
     Iterable,
     Iterator,
-    Mapping,
     Optional,
     Sequence,
     cast,
@@ -28,68 +28,22 @@ from pip._internal.metadata.base import (
 )
 from pip._internal.utils.misc import normalize_path
 from pip._internal.utils.temp_dir import TempDirectory
-from pip._internal.utils.wheel import parse_wheel, read_wheel_metadata_file
 
 from ._compat import BasePath, get_dist_name
 
 
-class WheelDistribution(importlib.metadata.Distribution):
-    """An ``importlib.metadata.Distribution`` read from a wheel.
-
-    Although ``importlib.metadata.PathDistribution`` accepts ``zipfile.Path``,
-    its implementation is too "lazy" for pip's needs (we can't keep the ZipFile
-    handle open for the entire lifetime of the distribution object).
-
-    This implementation eagerly reads the entire metadata directory into the
-    memory instead, and operates from that.
+def load(wheel: zipfile.ZipFile) -> zipfile.ZipFile:
     """
+    Ensure that the wheel is in-memory.
 
-    def __init__(
-        self,
-        files: Mapping[pathlib.PurePosixPath, bytes],
-        info_location: pathlib.PurePosixPath,
-    ) -> None:
-        self._files = files
-        self.info_location = info_location
+    Allows the handle to remain open for the lifetime of the distribution
+    object without disrupting filesystem operations on sensitive
+    operating systems.
+    """
+    if isinstance(wheel.fp, io.BytesIO):
+        return wheel
 
-    @classmethod
-    def from_zipfile(
-        cls,
-        zf: zipfile.ZipFile,
-        name: str,
-        location: str,
-    ) -> "WheelDistribution":
-        info_dir, _ = parse_wheel(zf, name)
-        paths = (
-            (name, pathlib.PurePosixPath(name.split("/", 1)[-1]))
-            for name in zf.namelist()
-            if name.startswith(f"{info_dir}/")
-        )
-        files = {
-            relpath: read_wheel_metadata_file(zf, fullpath)
-            for fullpath, relpath in paths
-        }
-        info_location = pathlib.PurePosixPath(location, info_dir)
-        return cls(files, info_location)
-
-    def iterdir(self, path: InfoPath) -> Iterator[pathlib.PurePosixPath]:
-        # Only allow iterating through the metadata directory.
-        if pathlib.PurePosixPath(str(path)) in self._files:
-            return iter(self._files)
-        raise FileNotFoundError(path)
-
-    def read_text(self, filename: str) -> Optional[str]:
-        try:
-            data = self._files[pathlib.PurePosixPath(filename)]
-        except KeyError:
-            return None
-        try:
-            text = data.decode("utf-8")
-        except UnicodeDecodeError as e:
-            wheel = self.info_location.parent
-            error = f"Error decoding metadata for {wheel}: {e} in {filename} file"
-            raise UnsupportedWheel(error)
-        return text
+    return zipfile.ZipFile(io.BytesIO(wheel.fp.read()))
 
 
 class Distribution(BaseDistribution):
@@ -130,12 +84,12 @@ class Distribution(BaseDistribution):
     def from_wheel(cls, wheel: Wheel, name: str) -> BaseDistribution:
         try:
             with wheel.as_zipfile() as zf:
-                dist = WheelDistribution.from_zipfile(zf, name, wheel.location)
+                dist = importlib.metadata.PathDistribution(zipfile.Path(load(zf)))
         except zipfile.BadZipFile as e:
             raise InvalidWheel(wheel.location, name) from e
         except UnsupportedWheel as e:
             raise UnsupportedWheel(f"{name} has an invalid wheel, {e}")
-        return cls(dist, dist.info_location, pathlib.PurePosixPath(wheel.location))
+        return cls(dist, None, None)
 
     @property
     def location(self) -> Optional[str]:
